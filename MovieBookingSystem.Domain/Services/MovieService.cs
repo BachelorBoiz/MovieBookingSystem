@@ -18,6 +18,11 @@ public class MovieService : IMovieService
         return _repo.GetMovies();
     }
 
+    public void UpdateMovieQuantity(int movieId)
+    {
+        throw new NotImplementedException();
+    }
+
     public Movie GetMovieById(int id)
     {
         if (id > 0)

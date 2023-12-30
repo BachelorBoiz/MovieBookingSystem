@@ -6,7 +6,7 @@ public interface IBookingService
 {
     public List<Booking> GetBookings();
     public Booking GetBookingById(int id);
-    public Booking CreateBooking(Booking booking);
+    public Booking CreateBooking(Booking booking, IEnumerable<Movie> movies);
     public Booking UpdateBooking(Booking booking);
     public void DeleteBooking(int id);
 }

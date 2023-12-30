@@ -8,5 +8,4 @@ public class Movie
     public int Rating { get; set; }
     public int QuantityAvailable { get; set; }
     public string Description { get; set; }
-    public List<MovieBookings> Bookings { get; set; }
 }

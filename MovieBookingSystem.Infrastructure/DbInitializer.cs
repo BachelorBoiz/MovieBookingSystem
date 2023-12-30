@@ -34,9 +34,9 @@ public class DbInitializer : IDbInitializer
         DateTime date = DateTime.Today.AddDays(4);
         List<Booking> bookings = new List<Booking>
         {
-            new Booking { StartDate=date, EndDate=date.AddDays(14), CustomerId=1},
-            new Booking { StartDate=date, EndDate=date.AddDays(14), CustomerId=2},
-            new Booking { StartDate=date, EndDate=date.AddDays(14), CustomerId=1}
+            new Booking { StartDate=date, EndDate=date.AddDays(14)},
+            new Booking { StartDate=date, EndDate=date.AddDays(14)},
+            new Booking { StartDate=date, EndDate=date.AddDays(14)}
         };
         
         context.Movies.AddRange(movies);
@@ -55,8 +55,9 @@ public class DbInitializer : IDbInitializer
             foreach (var movie in moviesForBooking)
             {
                 var movieBooking = new MovieBookings { MovieId = movie.Id, BookingId = booking.Id };
-                booking.Movies ??= new List<MovieBookings>();
-                booking.Movies.Add(movieBooking);
+                //booking.Movies ??= new List<MovieBookings>();
+                //booking.Movies.Add(movieBooking);
+                
                 context.MovieBookings.Add(movieBooking);
             }
         }
