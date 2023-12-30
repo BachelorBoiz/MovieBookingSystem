@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using Moq;
+using MovieBookingSystem.Core.Exceptions;
 using MovieBookingSystem.Core.IServices;
 using MovieBookingSystem.Core.Models;
 using MovieBookingSystem.Domain.IRepositories;
@@ -11,8 +12,8 @@ namespace MovieBookingSystem.Test
     {
 
         [Theory]
-        [MemberData(nameof(SuccessfulBookingTestData))]
-        public void CreateBookingSuccessful(List<Movie> availableMovies, Booking booking)
+        [MemberData(nameof(BookingTestData))]
+        public void CreateBookingSuccessful(List<Movie> movies, Booking booking)
         {
             // Arrange
             var movieServiceMock = new Mock<IMovieService>();
@@ -21,25 +22,73 @@ namespace MovieBookingSystem.Test
             var bookingService = new BookingService(bookingRepoMock.Object, movieServiceMock.Object);
 
             movieServiceMock.Setup(service => service.GetMovies())
-                .Returns(availableMovies);
+                .Returns(movies);
 
             bookingRepoMock.Setup(repository => repository.CreateBooking(It.IsAny<Booking>()))
                 .Returns(booking);
 
             // Act
-            var result = bookingService.CreateBooking(booking, availableMovies);
+            var result = bookingService.CreateBooking(booking, movies);
 
             // Assert
             Assert.IsType<Booking>(result);
             Assert.Equal(booking.Id, result.Id);
-            foreach (var expectedMovie in availableMovies)
+            foreach (var expectedMovie in movies)
             {
                 Assert.Contains(expectedMovie, booking.Movies);
             }
             bookingRepoMock.Verify(repository => repository.CreateBooking(It.IsAny<Booking>()), Times.Once);
         }
 
-        public static IEnumerable<object[]> SuccessfulBookingTestData()
+        [Theory]
+        [MemberData(nameof(BookingTestDataWithUnavailableMovie))]
+        public void CreateBookingFailWithUnavailableMovie(List<Movie> movies, Booking booking)
+        {
+            // Arrange
+            var movieServiceMock = new Mock<IMovieService>();
+            var bookingRepoMock = new Mock<IBookingRepository>();
+
+            var bookingService = new BookingService(bookingRepoMock.Object, movieServiceMock.Object);
+
+            movieServiceMock.Setup(service => service.GetMovies())
+                .Returns(movies);
+
+            bookingRepoMock.Setup(repository => repository.CreateBooking(It.IsAny<Booking>()))
+                .Returns(booking);
+
+            // Act
+            var result = bookingService.CreateBooking(booking, movies);
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Theory]
+        [MemberData(nameof(BookingTestData))]
+        public void CreateBookingFailWhenCustomerHasOverdueBooking(List<Movie> movies, Booking booking)
+        {
+            // Arrange
+            var movieServiceMock = new Mock<IMovieService>();
+            var bookingRepoMock = new Mock<IBookingRepository>();
+
+            var bookingService = new BookingService(bookingRepoMock.Object, movieServiceMock.Object);
+
+            movieServiceMock.Setup(service => service.GetMovies())
+                .Returns(movies);
+
+            bookingRepoMock.Setup(repository => repository.CreateBooking(It.IsAny<Booking>()))
+                .Returns(booking);
+
+            booking.Customer.HasOverdueBooking = true;
+
+            // Act
+            Action act = () => bookingService.CreateBooking(booking, movies);
+
+            // Assert
+            Assert.Throws<CustomerHasOverdueBookingException>(act);
+        }
+
+        public static IEnumerable<object[]> BookingTestData()
         {
             yield return new object[]
             {
@@ -54,6 +103,33 @@ namespace MovieBookingSystem.Test
                     {
                         Id = 2, Title = "Lord of The Rings", Description = "Lord of the rings", Rating = 5,
                         ReleaseYear = 2001, QuantityAvailable = 1
+                    }
+                },
+                new Booking
+                {
+                    Id = 1,
+                    Customer = new Customer { Id = 1, Name = "John", HasOverdueBooking = false },
+                    StartDate = DateTime.Today,
+                    EndDate = DateTime.Today.AddDays(1)
+                }
+            };
+        }
+
+        public static IEnumerable<object[]> BookingTestDataWithUnavailableMovie()
+        {
+            yield return new object[]
+            {
+                new List<Movie>
+                {
+                    new Movie
+                    {
+                        Id = 1, Title = "Star Wars", Description = "War in space", Rating = 5, ReleaseYear = 1977,
+                        QuantityAvailable = 2
+                    },
+                    new Movie
+                    {
+                        Id = 3, Title = "Indiana Jones", Description = "Temple explorer man", Rating = 5,
+                        ReleaseYear = 1981, QuantityAvailable = 0
                     }
                 },
                 new Booking

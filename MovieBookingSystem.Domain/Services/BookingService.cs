@@ -47,7 +47,7 @@ public class BookingService : IBookingService
 
         booking.Movies = AddMoviesToBooking(movies);
 
-        if (booking.Movies.Count == 0)
+        if (booking.Movies.Count != movies.Count())
         {
             return null;
         }
