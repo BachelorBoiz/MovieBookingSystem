@@ -88,6 +88,30 @@ namespace MovieBookingSystem.Test
             Assert.Throws<CustomerHasOverdueBookingException>(act);
         }
 
+        [Theory]
+        [MemberData(nameof(BookingTestData))]
+        public void AddMoviesToBooking_WithAvailableMovies_ShouldReturnSelectedMovies(List<Movie> movies, Booking booking)
+        {
+            // Arrange
+            var movieServiceMock = new Mock<IMovieService>();
+            movieServiceMock.Setup(service => service.GetMovies())
+                .Returns(movies);
+
+            var bookingRepoMock = new Mock<IBookingRepository>();
+
+            var bookingService = new BookingService(bookingRepoMock.Object, movieServiceMock.Object);
+
+            // Act
+            var result = bookingService.AddMoviesToBooking(movies);
+            booking.Movies = result;
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
+            Assert.True(result.All(movie => movies.Any(selectedMovie => selectedMovie.Id == movie.Id)));
+            Assert.Equal(2, booking.Movies.Count);
+        }
+
         public static IEnumerable<object[]> BookingTestData()
         {
             yield return new object[]
