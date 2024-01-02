@@ -57,10 +57,10 @@ namespace MovieBookingSystem.Test
                 .Returns(booking);
 
             // Act
-            var result = bookingService.CreateBooking(booking, movies);
+            Action act = () => bookingService.CreateBooking(booking, movies);
 
             // Assert
-            Assert.Null(result);
+            Assert.Throws<MovieUnavailableException>(act);
         }
 
         [Theory]

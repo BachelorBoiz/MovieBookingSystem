@@ -31,18 +31,19 @@ public class BookingService : IBookingService
     public Booking CreateBooking(Booking booking, IEnumerable<Movie> movies)
     {
         ValidateBooking(booking, movies);
-
         var selectedMovies = AddMoviesToBooking(movies);
         if (selectedMovies.Count != movies.Count())
         {
-            return null;
+            throw new CouldNotAddMoviesToBookingException("Could not add movies to booking");
         }
-
+        booking.Movies = selectedMovies;
+        
         var newBooking = _repo.CreateBooking(booking);
 
         return newBooking;
     }
-    
+
+
     private void ValidateBooking(Booking booking, IEnumerable<Movie> movies)
     {
         if (booking.Customer.HasOverdueBooking)

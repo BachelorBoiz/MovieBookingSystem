@@ -20,6 +20,7 @@ public class CreateBookingSteps
     private CustomerHasOverdueBookingException _customerHasOverdueBookingException;
     private MovieUnavailableException _movieUnavailableException;
     private InvalidDateSpanException _invalidDateSpanException;
+    private ArgumentException _argumentException;
 
     public CreateBookingSteps()
     {
@@ -97,50 +98,7 @@ public class CreateBookingSteps
         
         movieServiceMock.Setup(service => service.GetMovies()).Returns(movies);
     }
-    
-    [Given("a list of available movies with limited quantities")]
-    public void GivenAListOfAvailableMoviesWithLimitedQuantities()
-    {
-        var movie1 = new Movie
-        {
-            Id = 1,
-            Title = "Lord of The Rings",
-            Description = "Lord of the rings",
-            Rating = 5,
-            ReleaseYear = 2001,
-            QuantityAvailable = 1
-        };
-        var movie2 = new Movie
-        {
-            Id = 2,
-            Title = "Star Wars",
-            Description = "War in space",
-            Rating = 4,
-            ReleaseYear = 1977,
-            QuantityAvailable = 2
-        };
-        movies.Add(movie1);
-        movies.Add(movie2);
-        
-        movieServiceMock.Setup(service => service.GetMovies()).Returns(movies);
-    }
-    
-    [Given("a booking with an attempt at booking more movies than available and a valid date span")]
-    public void GivenABookingWithAnAttemptAtBookingMoreMoviesThanAvailableAndAValidDateSpan()
-    {
-        booking.StartDate = DateTime.Today.AddDays(10);
-        booking.EndDate = DateTime.Today.AddDays(17);
 
-        var movieTitleToBook = "Lord of the Rings";
-        var movieToBook = movies.FirstOrDefault(m => m.Title == movieTitleToBook);
-
-        if (movieToBook != null)
-        {
-            booking.Movies.Add(movieToBook);
-            booking.Movies.Add(movieToBook);
-        }
-    }
-    
     [Given("a booking with a valid date span")]
     public void GivenABookingWithAValidDateSpan()
     {
@@ -153,6 +111,12 @@ public class CreateBookingSteps
     {
         booking.StartDate = DateTime.Today.AddDays(10);
         booking.EndDate = DateTime.Today.AddDays(18);
+    }
+    
+    [Given("a list with no movies")]
+    public void GivenAListWithNoMovies()
+    {
+        movieServiceMock.Setup(service => service.GetMovies()).Returns(movies);
     }
 
     [When("i create a booking")]
@@ -173,6 +137,10 @@ public class CreateBookingSteps
         catch (InvalidDateSpanException e)
         {
             _invalidDateSpanException = e;
+        }
+        catch (ArgumentException e)
+        {
+            _argumentException = e;
         }
     }
     
@@ -202,5 +170,11 @@ public class CreateBookingSteps
         Assert.IsType<InvalidDateSpanException>(_invalidDateSpanException);
         Assert.NotNull(_invalidDateSpanException);
     }
-    
+
+    [Then("the booking should throw an ArgumentException")]
+    public void ThenTheBookingShouldThrowAnArgumentException()
+    {
+        Assert.IsType<ArgumentException>(_argumentException);
+        Assert.NotNull(_argumentException);
+    }
 }

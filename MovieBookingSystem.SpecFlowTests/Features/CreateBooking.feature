@@ -21,12 +21,12 @@ Scenario: Failing to create booking when movie is unavailable
 	When i create a booking
 	Then the booking should throw a MovieUnavailableException
 	
-Scenario: Failing to create booking when customer tries to book more movies than available
-	Given a list of available movies with limited quantities
+Scenario: Failing to create booking when movie list is empty
+	Given a list with no movies
 	And a customer with no overdue bookings
-	And a booking with an attempt at booking more movies than available and a valid date span
+	And a booking with a valid date span
 	When i create a booking
-	Then the booking should throw a MovieUnavailableException
+	Then the booking should throw an ArgumentException
 	
 Scenario: Failing to create a booking with invalid date span
 	Given a list of available movies
