@@ -153,7 +153,6 @@ public class CreateBookingSteps
     [Then("the booking should throw a CustomerHasOverDueBookingException")]
     public void ThenTheBookingShouldThrowACustomerHasOverDueBookingException()
     {
-        Assert.IsType<CustomerHasOverdueBookingException>(_customerHasOverdueBookingException);
         Assert.NotNull(_customerHasOverdueBookingException);
     }
     

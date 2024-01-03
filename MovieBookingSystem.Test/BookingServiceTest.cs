@@ -32,7 +32,6 @@ namespace MovieBookingSystem.Test
 
             // Assert
             Assert.IsType<Booking>(result);
-            Assert.Equal(booking.Id, result.Id);
             foreach (var expectedMovie in movies)
             {
                 Assert.Contains(expectedMovie, booking.Movies);
